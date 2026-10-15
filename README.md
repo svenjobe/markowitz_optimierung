@@ -1,3 +1,30 @@
+# Markowitz-Optimierung mit Out-of-Sample-Test
+
+Optimale Portfolios nach Markowitz (Mean-Variance) aus zehn ETFs, geschlossen hergeleitet und numerisch mit Gewichtsgrenzen berechnet. Kern des Projekts ist ein Test, der die Optimierung auf Daten prüft, die sie nie gesehen hat.
+
+## Fragestellung
+
+Optimierte Portfolios sehen auf den Daten, mit denen sie berechnet wurden, immer gut aus. Die Frage ist, ob sie auch danach besser sind als ein gleich gewichtetes Portfolio (1/N).
+
+## Daten
+
+- Quelle: Yahoo Finance (`yfinance`), bereinigte Schlusskurse (Dividenden und Splits eingerechnet)
+- **Daten bis zum 14.08.2026**, fester Stichtag in `src/config.py`, lokal gespeichert in `data/`
+- 16.08.2016 bis 14.08.2026, 2.513 Handelstage
+- ETFs: SPY (US-Aktien groß), QQQ (Nasdaq 100), IWM (US-Aktien klein), EFA (Industrieländer ohne USA), EEM (Schwellenländer), TLT (US-Staatsanleihen lang), LQD (US-Unternehmensanleihen), GLD (Gold), VNQ (US-Immobilien), DBC (Rohstoffe)
+
+## Methode
+
+| Baustein | Umsetzung |
+|---|---|
+| Minimum-Varianz, geschlossen | Lagrange: w = Σ⁻¹·1 / (1'Σ⁻¹·1), Leerverkäufe erlaubt |
+| Tangentialportfolio, geschlossen | w ∝ Σ⁻¹(μ − rf) |
+| Long-only mit Obergrenze | numerisch (SLSQP), 0 ≤ wᵢ ≤ 30 % |
+| Effizienter Rand | kleinste Varianz je Zielrendite |
+| Schrumpfung | (1 − δ)Σ + δ·diag(Σ) mit δ = 0,2 |
+| Statischer Test | Gewichte aus Daten bis 29.12.2023, danach festgehalten |
+| Walk-Forward | Neuoptimierung alle 63 Handelstage mit den letzten 756 Tagen, ab 19.08.2019 |
+| Vergleich | 1/N und 5.000 zufällige Portfolios mit derselben Obergrenze |
 ## Ergebnisse
 
 Zeitraum: Training 16.08.2016 bis 29.12.2023 (1.856 Handelstage), Test 02.01.2024 bis 14.08.2026 (657 Handelstage). Gewichte höchstens 30 % je ETF, risikofreier Zins 3 %.
@@ -23,3 +50,18 @@ Die Aussagen gelten für diesen Zeitraum und diese zehn ETFs, nicht allgemein.
 ![Wertentwicklung im Testzeitraum](output/wertentwicklung_test.png)
 ![Walk-Forward](output/wertentwicklung_walk_forward.png)
 ![Rang gegen Zufallsportfolios](output/zufallsvergleich.png)
+
+Im Diagramm zur Wertentwicklung im Testzeitraum liegt die Linie von Max-Sharpe unter der von Max-Sharpe (Sigma geschrumpft), weil beide fast identisch sind.
+
+## Einschränkungen
+
+- Ein einziger Zeitraum und zehn Titel, keine allgemeine Aussage über Markowitz.
+- Der Testzeitraum war für alle Strategien günstiger als der Trainingszeitraum (1/N: Sharpe 0,35 im Training, 1,27 im Test).
+- Erwartete Renditen sind Mittelwerte der Vergangenheit und damit stark fehlerbehaftet.
+- Konstante Gewichte durch tägliches Rebalancing, keine Transaktionskosten, keine Steuern.
+- Risikofreier Zins (3 %) und Gewichtsgrenze (30 %) sind Annahmen und wirken direkt auf die Ergebnisse.
+- Keine Anlageberatung.
+
+## Projekt ausführen
+
+Python 3.10 oder neuer. Pakete installieren mit `pip install -r requirements.txt`, Analyse starten mit `python analyze.py`, Tests mit `python -m pytest` (25 Tests). Die Kursdaten liegen in `data/`, es ist kein Internet nötig.
