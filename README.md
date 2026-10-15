@@ -25,6 +25,7 @@ Optimierte Portfolios sehen auf den Daten, mit denen sie berechnet wurden, immer
 | Statischer Test | Gewichte aus Daten bis 29.12.2023, danach festgehalten |
 | Walk-Forward | Neuoptimierung alle 63 Handelstage mit den letzten 756 Tagen, ab 19.08.2019 |
 | Vergleich | 1/N und 5.000 zufällige Portfolios mit derselben Obergrenze |
+
 ## Ergebnisse
 
 Zeitraum: Training 16.08.2016 bis 29.12.2023 (1.856 Handelstage), Test 02.01.2024 bis 14.08.2026 (657 Handelstage). Gewichte höchstens 30 % je ETF, risikofreier Zins 3 %.
